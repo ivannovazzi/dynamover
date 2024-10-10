@@ -1,0 +1,30 @@
+name: Release and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write  
+  id-token: write
+
+jobs:
+  release-please:
+    name: Verify Changelog and Release PR creation
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.tag_name }}
+      release_created: ${{ steps.release.outputs.release_created }}
+    steps:      
+      - uses: actions/checkout@v4        
+      - run: cargo build --verbose
+      - run: cargo test --verbose
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          # this is a built-in strategy in release-please, see "Action Inputs"
+          # for more options
+          release-type: rust
+          target-branch: ${{ github.ref_name }}

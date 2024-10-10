@@ -9,7 +9,7 @@ use dynamodb_operations::{
     create_dynamodb_client, read_current_version, update_version, verify_table_exists,
 };
 use github_releases::{list_github_releases, select_release, verify_release_exists};
-use persistence::{AppConfig, get_config};
+use persistence::{get_config, AppConfig};
 use semver::Version;
 use std::env;
 
@@ -44,7 +44,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Get version from command line arguments or prompt user
     let args: Vec<String> = env::args().collect();
     let version = if args.len() > 1 {
-        let _ = verify_release_exists(&releases, &args[1]);
+        let exists = verify_release_exists(&releases, &args[1]);
+        if !exists {
+            eprintln!("Error: Release version '{}' does not exist.", &args[1]);
+            std::process::exit(1);
+        }
         args[1].clone()
     } else {
         // Select a release using the select_release function
