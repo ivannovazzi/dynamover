@@ -1,11 +1,8 @@
-// src/github_releases.rs
 
 use serde::Deserialize;
 use colored::*;
 use inquire::Select;
 use chrono::{DateTime, Utc};
-
-
 
 #[derive(Debug, Deserialize)]
 pub struct Release {
@@ -109,12 +106,44 @@ pub async fn select_release(
 pub fn verify_release_exists(
     releases: &Vec<Release>,
     version: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> bool {
     let version = format!("v{}", version);
-    if releases.iter().any(|r| r.tag_name == version) {
-        Ok(())
-    } else {
-        eprintln!("Error: Release version '{}' does not exist.", version);
-        std::process::exit(1);
+    return releases.iter().any(|r| r.tag_name == version)
+}
+
+
+
+#[cfg(test)]
+mod tests {    
+    use super::*;
+
+    #[test]
+    fn test_verify_release_exists_found() {
+        let releases = vec![
+            Release {
+                tag_name: "v1.0.0".to_string(),
+                name: Some("Version 1.0.0".to_string()),
+                published_at: Some("2023-01-01T00:00:00Z".to_string()),
+            },
+        ];
+        let version = "1.0.0";
+        let result = verify_release_exists(&releases, version);
+        // assert is true
+        assert!(result);
+    }
+
+    #[test]
+    fn test_verify_release_exists_not_found() {
+        let releases = vec![
+            Release {
+                tag_name: "v1.0.0".to_string(),
+                name: Some("Version 1.0.0".to_string()),
+                published_at: Some("2023-01-01T00:00:00Z".to_string()),
+            },
+        ];
+        let version = "2.0.0";
+        let result = verify_release_exists(&releases, version);        
+        // assert is false
+        assert!(!result);
     }
 }
