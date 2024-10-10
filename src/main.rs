@@ -9,14 +9,26 @@ use dynamodb_operations::{
     create_dynamodb_client, read_current_version, update_version, verify_table_exists,
 };
 use github_releases::{list_github_releases, select_release, verify_release_exists};
-use persistence::{get_config, AppConfig};
+use persistence::{get_config, reset_config, AppConfig};
 use semver::Version;
 use std::env;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Collect command-line arguments
+    let args: Vec<String> = env::args().collect();
+
+    // Check for the --reset flag
+    if args.contains(&"--reset".to_string()) {
+        reset_config()?;
+        println!("{}", "Configuration has been reset.".green());
+        return Ok(());
+    }
+
+    // Load the configuration
     let app_config = get_config()?;
-    // descrustruct the app_config
+
+    // Destructure the app_config
     let AppConfig {
         github_token,
         table_name,
@@ -41,15 +53,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     println!();
 
-    // Get version from command line arguments or prompt user
-    let args: Vec<String> = env::args().collect();
+    // Determine the version to use
     let version = if args.len() > 1 {
-        let exists = verify_release_exists(&releases, &args[1]);
-        if !exists {
-            eprintln!("Error: Release version '{}' does not exist.", &args[1]);
+        // Skip program name and check for other args
+        let version_arg = args.iter().skip(1).find(|&arg| !arg.starts_with('-'));
+        if let Some(version_value) = version_arg {
+            // Verify the release exists
+            if !verify_release_exists(&releases, version_value) {
+                eprintln!("Error: The provided version does not exist.");
+                std::process::exit(1);
+            }
+            version_value.clone()
+        } else {
+            // No version provided
+            eprintln!("Error: No version provided.");
             std::process::exit(1);
         }
-        args[1].clone()
     } else {
         // Select a release using the select_release function
         let selected_release = select_release(releases, &current_version).await?;
