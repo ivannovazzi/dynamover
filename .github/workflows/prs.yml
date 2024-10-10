@@ -1,7 +1,7 @@
 name: Release and Deploy
 
 on:
-  pr:
+  pull_request:
     branches:
       - main
 
