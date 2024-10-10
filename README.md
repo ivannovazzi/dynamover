@@ -1,4 +1,4 @@
-Flare Rust is a Rust application that interacts with AWS DynamoDB to manage versioning for a service. It allows users to select an AWS profile interactively, read the current version from DynamoDB, and update it if necessary.
+Dynamover is a Rust application that interacts with AWS DynamoDB to manage versioning for a service. It allows users to select an AWS profile interactively, read the current version from DynamoDB, and update it if necessary.
 
 ## Features
 
@@ -17,8 +17,8 @@ Flare Rust is a Rust application that interacts with AWS DynamoDB to manage vers
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/yourusername/flare-rust.git
-   cd flare-rust
+   git clone https://github.com/yourusername/dynamover.git
+   cd dynamover
    ```
 
 2. Install dependencies:
@@ -45,7 +45,7 @@ To build the release version of your Rust program:
 cargo build --release
 ```
 
-The optimized binary will be located in the `target/release` directory. You can find your executable at `target/release/flare-rust`.
+The optimized binary will be located in the `target/release` directory. You can find your executable at `target/release/dynamover`.
 
 Example
 
